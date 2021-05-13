@@ -1,0 +1,562 @@
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+
+class User
+{
+	string logname_;
+	string password_;
+	string name_;
+	bool online_;
+
+public:
+
+	User(string logname = "", string password = "", string name = "", bool online = false)
+		: logname_(logname), password_(password), name_(name), online_(online)
+	{}
+
+
+	//User()  
+//{
+// string logname_ = "";
+// string password_ = "";
+// string name_ = "";
+//};
+
+//User(string logname, string password, string name)
+//{
+
+// logname_ = logname;
+// password_ = password;
+// name_ = name;
+// bool_ online = false;
+//}
+
+	string GetInfo()
+	{
+		// ************* \tab
+		return "logname:" + logname_ + "\t| password:" + password_ + "\t| name:" + name_ + "\t| online:" + to_string(online_);
+	}
+
+	string GetLogname() { return logname_; }
+	string GetPassword() { return password_; }
+	string GetName() { return name_; }
+	bool GetOnline() { return online_; }
+
+	void SetOnline(bool online) { online_ = online; }
+
+};
+
+class Message
+{
+public:
+	string sender;
+	string text;
+	string recipient;
+
+	Message() { }
+
+
+	Message(string senderName, string text, string recipient = "")
+	{
+		sender = senderName;
+		this->text = text;
+		this->recipient = recipient;
+	}
+
+	//Message(string senderName, string text)
+	//{
+	// sender = senderName;
+	// this->text = text;
+	//  this->recipient = "";
+	//}
+
+};
+
+bool check_logname(User*& users, int sizeUsers, string logname) {
+
+	for (int i = 0; i < sizeUsers; i++)
+	{
+		// cout << "i:" << i << "logname: " << users[i].logname << endl;
+
+		if (users[i].GetLogname() == logname)
+		{
+			return true;
+		}
+	}
+
+
+	return false;
+}
+
+int check_password(User*& users, int sizeUsers, string password, string logname) {
+
+	for (int i = 0; i < sizeUsers; i++)
+	{
+		// cout << "i:" << i << "password: " << users[i].logname << endl;
+
+		if (users[i].GetPassword() == password && users[i].GetLogname() == logname)
+		{
+			users[i].SetOnline(true);
+			// cout << "user[" << i << "]=" << users[i].GetOnline() << endl;
+			return i;
+		}
+	}
+
+	return -1;
+}
+
+int check_name(User*& users, int sizeUsers, string name) {
+
+	for (int i = 0; i < sizeUsers; i++)
+	{
+		// cout << "i:" << i << "logname: " << users[i].logname << endl;
+
+		if (users[i].GetName() == name)
+		{
+			return i;
+		}
+	}
+
+	return -1;
+}
+
+string userInput(string query)
+{
+	string userInput{};
+	cout << query << ": ";
+
+	getline(cin >> ws, userInput);
+
+	return userInput;
+}
+
+void push_messages(Message*& messages, int& sizeMessageUser, Message newMessage)
+
+{
+	Message* newMessages = new Message[sizeMessageUser + 1];
+	for (int i = 0; i < sizeMessageUser; i++)
+	{
+		newMessages[i] = messages[i];
+	}
+
+	newMessages[sizeMessageUser] = newMessage; // push new message
+	sizeMessageUser++;
+	delete[] messages;
+
+	messages = newMessages;
+
+}
+
+void push_messages_public(Message*& messages_public, int& sizeMessagePublic, Message newMessagePublic)
+{
+	Message* newMessagesPublic = new Message[sizeMessagePublic + 1];
+	for (int i = 0; i < sizeMessagePublic; i++)
+	{
+		newMessagesPublic[i] = messages_public[i];
+	}
+
+	newMessagesPublic[sizeMessagePublic] = newMessagePublic;
+	sizeMessagePublic++;
+	delete[] messages_public;
+
+	messages_public = newMessagesPublic;
+
+}
+
+
+void push_users(User*& users, int& sizeUsers, User newUser)
+{
+	User* newUsers = new User[sizeUsers + 1];
+	for (int i = 0; i < sizeUsers; i++)
+	{
+		newUsers[i] = users[i];
+	}
+
+	newUsers[sizeUsers] = newUser; // push new message
+	sizeUsers++;
+	delete[] users;
+
+	users = newUsers;
+
+}
+
+
+
+int main() {
+
+	cout << "start" << endl << endl;
+
+
+	int sizeUsers = 3;
+	int sizeMessageUser = 6;
+
+	int sizeMessagePublic = 4;
+
+
+	User* users = new User[sizeUsers];
+
+	// users list
+	for (int i = 0; i < sizeUsers; i++)
+	{
+		cout << users[i].GetInfo() << endl;
+	}
+	cout << endl;
+
+	users[0] = User("log1", "pass1", "name1");
+	users[1] = User("log2", "pass2", "name2");
+	users[2] = User("log3", "pass3", "name3");
+
+	Message* messages = new Message[sizeMessageUser];
+
+	messages[0] = Message("name1", "Hallo log2", "name2");
+	messages[1] = Message("name2", "Hallo log1", "name1");
+	messages[2] = Message("name1", "Hallo log2", "name2");
+	messages[3] = Message("name1", "Hallo log3", "name3");
+	messages[4] = Message("name3", "Hallo log2", "name2");
+	messages[5] = Message("name2", "Hallo log3", "name3");
+
+	Message* messages_public = new Message[sizeMessagePublic];
+
+	messages_public[0] = Message("log1", "Hallo, All", "");
+	messages_public[1] = Message("log2", "Hi, All", "");
+	messages_public[2] = Message("log1", "Hallo, All", "");
+	messages_public[3] = Message("log1", "Hallo, All", "");
+
+
+	string logname;
+	string password;
+	string password2 = "";
+	string senderName;
+	int id_logname = -1;
+
+	char action = '-';
+
+	// bool online = false;
+	bool whileRegLog = true;   // registration or login
+	bool whileMessage = false;
+	bool whileChatPrivate = false;
+	bool whileChatPublic = false;
+
+	string query; // question for input
+
+	string recipientName;
+	int id_recipient = -1;
+
+	string myTextPrivat;
+	string myTextPublic;
+
+
+	// users list
+	for (int i = 0; i < sizeUsers; i++)
+	{
+		cout << users[i].GetInfo() << endl;
+	}
+	cout << endl;
+
+
+	while (whileRegLog)
+	{
+
+		cout << "Menu: | Login: 1 | Registration: 2  | exit from program: 0 | ";
+		cin >> action;
+
+		switch (action)
+		{
+		case '0':
+			cout << action << " - exit" << endl;
+			whileRegLog = false;
+			whileMessage = false;
+			action = '-';
+			break;
+
+		case '1':
+			cout << action << " - login" << endl;
+
+			// login only 3 try
+			for (int i = 1; i <= 3; i++)
+			{
+				logname = userInput("logname");
+
+				if (check_logname(users, sizeUsers, logname))
+				{
+
+					password = userInput("password");
+					id_logname = check_password(users, sizeUsers, password, logname);
+					if (id_logname >= 0)
+
+					{
+						// bool online = true;
+
+						senderName = users[id_logname].GetName();
+						cout << "your senderName <" << users[id_logname].GetName() << ">. You are online" << endl << endl;
+						i = 4;
+						whileRegLog = false;
+						whileMessage = true;
+					}
+					else
+					{
+						cout << "password invalid, try again..." << endl;
+					}
+
+				}
+				else if (i <= 2) cout << "logname " << logname << " is unbekannt, try again... ";
+			}
+
+			action = '-';
+			break;
+
+		case '2':
+
+			logname = userInput("new logname");
+			senderName = userInput("new name");
+
+
+			if (logname != "" && senderName != "") // if input not empty
+
+				
+			{
+				// login only 3 try
+				for (int i = 1; i <= 3; i++)
+				{
+				password = userInput("new password");
+				password2 = userInput("repeat new password");
+
+				if (password == password2)
+				{
+				User newUser(logname, password, senderName);
+				push_users(users, sizeUsers, newUser); // add to array users
+
+				i = 4; // exit for
+
+				cout << "you have successfully registered: ";
+				cout << users[sizeUsers - 1].GetInfo() << endl << endl;
+
+				// whileRegLog = false; // exit registration
+										// whileMessage = true; 
+				}
+				else
+				{
+				cout << "repeat password invalid, try again..." << endl;
+				}
+
+				}
+
+
+			}
+
+			action = '-';
+			break;
+
+		default:
+			cout << action << " - input is false" << endl;
+			action = '-';
+			break;
+		}
+	}
+
+
+	// users list
+	for (int i = 0; i < sizeUsers; i++)
+	{
+		cout << users[i].GetInfo() << endl;
+	}
+	cout << endl;
+
+
+
+
+	// Menu: | write Message to one: 1 | write Message to all: 2  | exit: 0 |
+	while (whileMessage)
+	{
+
+		whileChatPrivate = true;
+		whileChatPublic = true;
+
+
+		cout << "Menu: | write Message to one: 1 | write Message to all: 2  | exit from program: 0 | ";
+		cin >> action;
+
+		switch (action)
+		{
+		case '0':
+			cout << action << " - exit" << endl;
+			whileMessage = false;
+			action = '-';
+			break;
+
+		case '1':
+			cout << action << " - Message to recipient" << endl;
+
+			whileChatPrivate = true;  // by exit from privat chat = false
+
+			// recipients list
+			for (int i = 0; i < sizeUsers; i++)
+			{
+				cout << users[i].GetName() << ", ";
+			}
+			cout << endl;
+
+			// input recipient name
+			recipientName = userInput("Enter recipient name for message");
+			cout << "recipient name: " << recipientName << endl;
+
+			id_recipient = check_name(users, sizeUsers,
+
+				recipientName);
+			if (id_recipient >= 0)
+			{
+				// list messages to/from recipient 
+				for (int i = 0; i < sizeMessageUser; i++)
+				{
+					if ((messages[i].sender == senderName && messages[i].recipient == users[id_recipient].GetName()) || (messages[i].sender == users[id_recipient].GetName() && messages[i].recipient == senderName))
+					{
+						cout << messages[i].text << endl;
+					}
+				}
+
+				// new message to recipient | exit
+				while (whileChatPrivate)
+				{
+
+					myTextPrivat = userInput("Your new message for " + recipientName);
+					cout << "Your message:" << myTextPrivat << endl;
+
+					Message newMessage(senderName, myTextPrivat, recipientName); // object newMessage for push_messages()
+
+					push_messages(messages, sizeMessageUser, newMessage);
+					cout << "newMessage:" << newMessage.sender << " | " << newMessage.text << " | " << newMessage.recipient << endl;
+
+
+					// list messages to/from recipient
+					for (int i = 0; i < sizeMessageUser; i++)
+					{
+						// filter - only your logname und recipient logname 
+						if ((messages[i].sender == senderName && messages[i].recipient == users[id_recipient].GetName()) || (messages[i].sender == users[id_recipient].GetName() && messages[i].recipient == senderName))
+						{
+							cout << messages[i].text << endl;
+						}
+					}
+
+					cout << "ChatPrivateMenu: | next Message: 1 | exit from privat to main menu: 0 |" << endl;
+					cin >> action;
+
+					// while (whileChatPrivate)
+					switch (action)
+					{
+					case '0':
+						cout << action << " - exit" << endl;
+						whileChatPrivate = false;
+						recipientName = "";
+						id_recipient = -1;
+						action = '-';
+						break;
+					case '1':
+						cout << action << " - next Message" << endl;
+
+						action = '-';
+						break;
+					default:
+						cout << action << " - input is false" << endl;
+						action = '-';
+						break;
+					}
+
+				}
+
+			}
+			else cout << "invalid recipient name. Try again..." << endl;
+
+			action = '-';
+			break; // case '1' - from switch - while(!whileProg)
+
+
+			// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+			// ERROR - by write message to all, after 2 x write message to one
+			// Registration
+
+
+		case '2':
+			cout << action << " - Public message" << endl;
+			cout << "These users will see your message:" << endl;
+
+
+			// recipients list
+			for (int i = 0; i < sizeUsers; i++)
+
+			{
+				cout << users[i].GetName() << ", ";
+			}
+			cout << endl;
+
+
+			for (int i = 0; i < sizeMessagePublic; i++)
+			{
+				cout << messages_public[i].sender << ": " << messages_public[i].text << endl;
+			}
+
+			while (whileChatPublic)
+			{
+
+				myTextPublic = userInput("Enter Your new public message");
+
+				cout << "Your public message:" << myTextPublic << endl;
+
+				Message newMessagePublic(senderName, myTextPublic);
+
+				push_messages_public(messages_public, sizeMessagePublic, newMessagePublic);
+
+				// list messages to/from recipient
+				for (int i = 0; i < sizeMessagePublic; i++)
+				{
+					cout << messages_public[i].sender << ": " << messages_public[i].text << endl;
+
+				}
+				cout << "ChatPublicMenu: | next message all: 1 | exit from public to main menu: 0 |" << endl;
+				cin >> action;
+
+				// while (whileChatPublic)
+				switch (action)
+				{
+				case '0':
+					cout << action << " - exit PublivChat" << endl;
+					whileChatPublic = false;
+					action = '-';
+					break;
+				case '1':
+					cout << action << " - next Message to all" << endl;
+					action = '-';
+					break;
+				default:
+					cout << action << " - input is false" << endl;
+					action = '-';
+					break;
+				}
+
+			} // while publicChat
+
+
+			cout << "exit from publicChat chat. action now: " << action << endl;
+
+			action = '-';
+			break; // case '2' - from switch - while(!whileProg)
+
+
+		default:
+			cout << action << " - default: input is false" << endl;
+			action = '-';  // ????
+			break; // from switch - while(!whileProg)
+		}
+
+	}
+
+
+
+	cout << endl << endl << endl << "-----------------------------------------------";
+	delete[] users;
+	delete[] messages;
+	delete[] messages_public;
+	return 0;
+}
